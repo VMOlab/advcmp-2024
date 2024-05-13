@@ -1,0 +1,28 @@
+digraph "CFG for 'main' function" {
+	label="CFG for 'main' function";
+
+	Node0x556e2b8867a0 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#88abfd70",label="{entry:\l  %retval = alloca i32, align 4\l  %x = alloca i32, align 4\l  %y = alloca i32, align 4\l  %i = alloca i32, align 4\l  %j = alloca i32, align 4\l  store i32 0, ptr %retval, align 4\l  store i32 12, ptr %x, align 4\l  store i32 20, ptr %y, align 4\l  store i32 0, ptr %j, align 4\l  br label %for.cond\l}"];
+	Node0x556e2b8867a0 -> Node0x556e2b8867f0;
+	Node0x556e2b8867f0 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#f3c7b170",label="{for.cond:                                         \l  %0 = load i32, ptr %j, align 4\l  %cmp = icmp slt i32 %0, 20\l  br i1 %cmp, label %for.body, label %for.end8\l|{<s0>T|<s1>F}}"];
+	Node0x556e2b8867f0:s0 -> Node0x556e2b886750;
+	Node0x556e2b8867f0:s1 -> Node0x556e2b8866b0;
+	Node0x556e2b886750 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#f3c7b170",label="{for.body:                                         \l  store i32 0, ptr %i, align 4\l  br label %for.cond1\l}"];
+	Node0x556e2b886750 -> Node0x556e2b889820;
+	Node0x556e2b889820 [shape=record,color="#b70d28ff", style=filled, fillcolor="#b70d2870",label="{for.cond1:                                        \l  %1 = load i32, ptr %i, align 4\l  %cmp2 = icmp slt i32 %1, 12\l  br i1 %cmp2, label %for.body3, label %for.end\l|{<s0>T|<s1>F}}"];
+	Node0x556e2b889820:s0 -> Node0x556e2b889a30;
+	Node0x556e2b889820:s1 -> Node0x556e2b889c50;
+	Node0x556e2b889a30 [shape=record,color="#b70d28ff", style=filled, fillcolor="#b70d2870",label="{for.body3:                                        \l  %2 = load i32, ptr %i, align 4\l  %3 = load i32, ptr %j, align 4\l  %cmp4 = icmp sgt i32 %2, %3\l  br i1 %cmp4, label %if.then, label %if.end\l|{<s0>T|<s1>F}}"];
+	Node0x556e2b889a30:s0 -> Node0x556e2b889f70;
+	Node0x556e2b889a30:s1 -> Node0x556e2b889fe0;
+	Node0x556e2b889f70 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#d24b4070",label="{if.then:                                          \l  br label %for.inc\l}"];
+	Node0x556e2b889f70 -> Node0x556e2b88a160;
+	Node0x556e2b889fe0 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#d24b4070",label="{if.end:                                           \l  %call = call i32 (ptr, ...) @printf(ptr noundef @.str)\l  br label %for.inc\l}"];
+	Node0x556e2b889fe0 -> Node0x556e2b88a160;
+	Node0x556e2b88a160 [shape=record,color="#b70d28ff", style=filled, fillcolor="#b70d2870",label="{for.inc:                                          \l  %4 = load i32, ptr %i, align 4\l  %inc = add nsw i32 %4, 1\l  store i32 %inc, ptr %i, align 4\l  br label %for.cond1, !llvm.loop !6\l}"];
+	Node0x556e2b88a160 -> Node0x556e2b889820;
+	Node0x556e2b889c50 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#f3c7b170",label="{for.end:                                          \l  %call5 = call i32 (ptr, ...) @printf(ptr noundef @.str.1)\l  br label %for.inc6\l}"];
+	Node0x556e2b889c50 -> Node0x556e2b88b350;
+	Node0x556e2b88b350 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#f3c7b170",label="{for.inc6:                                         \l  %5 = load i32, ptr %j, align 4\l  %inc7 = add nsw i32 %5, 1\l  store i32 %inc7, ptr %j, align 4\l  br label %for.cond, !llvm.loop !8\l}"];
+	Node0x556e2b88b350 -> Node0x556e2b8867f0;
+	Node0x556e2b8866b0 [shape=record,color="#3d50c3ff", style=filled, fillcolor="#88abfd70",label="{for.end8:                                         \l  ret i32 0\l}"];
+}
