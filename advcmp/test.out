@@ -1,0 +1,11 @@
+Instruction hit counts
+-----------------------------
+add : 2
+call : 2
+ret : 1
+load : 6
+br : 10
+alloca : 5
+store : 7
+icmp : 3
+-----------------------------

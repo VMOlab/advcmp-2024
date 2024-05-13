@@ -1,16 +1,30 @@
 #include "InstructionCounter.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/StringRef.h"
+#include "llvm/IR/InstIterator.h"
+#include "llvm/IR/Instruction.h"
 #include "llvm/Passes/PassBuilder.h"
 #include "llvm/Passes/PassPlugin.h"
 #include "llvm/Support/raw_ostream.h"
+
+#include <utility>
 
 using namespace llvm;
 
 PreservedAnalyses InstructionCounter::run(Function &F,
                                           FunctionAnalysisManager &FAM) {
   //******************************** TODO 1 ********************************
-
+  // alt + shift + f for formatting
+  for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; ++I) {
+    Instruction &inst = *I;
+    const auto name = inst.getOpcodeName();
+    if (InstructionCounter.contains(name)) {
+      InstructionCounter.insert_or_assign(name,
+                                          InstructionCounter.lookup(name) + 1);
+    } else {
+      InstructionCounter.insert(std::make_pair(name, 1));
+    }
+  }
   //****************************** TODO 1 END ******************************
 
   errs() << "Instruction hit counts\n";
