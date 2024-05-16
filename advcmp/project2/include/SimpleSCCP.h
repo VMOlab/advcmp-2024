@@ -131,6 +131,7 @@ private:
   // Helpers.
   bool isFirstVisit(const llvm::BasicBlock &BB);
   bool isExecutableBlock(const llvm::BasicBlock &BB);
+  bool isExecutableEdge(const CFGEdge &CE);
 
   void appendExecutableSuccessors(const llvm::BranchInst &I);
   ConstantValue getConstantValue(const llvm::Value &Value);

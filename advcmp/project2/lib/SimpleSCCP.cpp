@@ -101,8 +101,10 @@ SimpleSCCPAnalysis::InstructionVisitor::visitBranchInst(const BranchInst &I) {
     if (C.isConstant()) {
       if (C.value() != 0)
         ThePass.ExecutableEdges.insert({I.getParent(), I.getSuccessor(0)});
+        ThePass.CFGWorkset.insert({I.getParent(), I.getSuccessor(0)});
       else
         ThePass.ExecutableEdges.insert({I.getParent(), I.getSuccessor(1)});
+        ThePass.CFGWorkset.insert({I.getParent(), I.getSuccessor(1)});
     }
   } else {
     ThePass.appendExecutableSuccessors(I);
@@ -298,6 +300,10 @@ bool SimpleSCCPAnalysis::isExecutableBlock(const BasicBlock &BB) {
       return true;
   }
   return false;
+}
+
+bool SimpleSCCPAnalysis::isExecutableEdge(const CFGEdge &CE) {
+  return ExecutableEdges.count(CE) != 0;
 }
 
 void SimpleSCCPAnalysis::appendExecutableSuccessors(const BranchInst &I) {
