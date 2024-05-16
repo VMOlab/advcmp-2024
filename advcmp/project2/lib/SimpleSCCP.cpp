@@ -310,9 +310,10 @@ bool SimpleSCCPAnalysis::isExecutableEdge(const CFGEdge &CE) {
 void SimpleSCCPAnalysis::appendExecutableSuccessors(const BranchInst &I) {
   for (const BasicBlock *BB : I.successors()) {
     CFGEdge Candidate = CFGEdge{I.getParent(), BB};
-    if (ExecutableEdges.count(Candidate) == 0)
+    if (ExecutableEdges.count(Candidate) == 0) {
       CFGWorkset.insert(Candidate);
       ExecutableEdges.insert(Candidate);
+    }
   }
 }
 
