@@ -311,6 +311,7 @@ void SimpleSCCPAnalysis::appendExecutableSuccessors(const BranchInst &I) {
     CFGEdge Candidate = CFGEdge{I.getParent(), BB};
     if (ExecutableEdges.count(Candidate) == 0)
       CFGWorkset.insert(Candidate);
+      ExecutableEdges.insert(Candidate);
   }
 }
 
