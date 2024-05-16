@@ -1,5 +1,18 @@
 clang -O0 -S -emit-llvm -Xclang -disable-O0-optnone -fno-discard-value-names test.c -o test.ll
 
+cmake -S project1 -G Ninja -B build
+
 cmake --build build
 
-opt -S -load-pass-plugin='build/lib/libInstructionCounter.so' -passes='instruction-counter ' test.ll -disable-output 2> test.out
+opt -S -load-pass-plugin='build/lib/libInstructionCounter.so' -passes='instruction-counter' test.ll -disable-output 2> test.out
+
+-------------------------------------------------------------------
+clang -O0 -S -emit-llvm -Xclang -disable-O0-optnone -fno-discard-value-names ./project2/test.c -o ./project2/test.ll
+
+cmake -S project2 -G Ninja -B build
+
+cmake --build build
+
+opt -S -passes='mem2reg' ./project2/test.ll -o ./project2/input.ll
+
+opt -S -load-pass-plugin='build/lib/libSimpleSCCP.so' -passes='print<simple-sccp>' ./project2/test.ll -disable-output 2> ./project2/test.out
