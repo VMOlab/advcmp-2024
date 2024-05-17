@@ -7,12 +7,16 @@ cmake --build build
 opt -S -load-pass-plugin='build/lib/libInstructionCounter.so' -passes='instruction-counter' test.ll -disable-output 2> test.out
 
 -------------------------------------------------------------------
-clang -O0 -S -emit-llvm -Xclang -disable-O0-optnone -fno-discard-value-names ./project2/test.c -o ./project2/test.ll
+sudo chmod a+x ./build2.sh
+
+./build2.sh
 
 cmake -S project2 -G Ninja -B build
 
-cmake --build build
+clang -O0 -S -emit-llvm -Xclang -disable-O0-optnone -fno-discard-value-names ./project2/test.c -o ./project2/test.ll
 
 opt -S -passes='mem2reg' ./project2/test.ll -o ./project2/input.ll
+
+cmake --build build
 
 opt -S -load-pass-plugin='build/lib/libSimpleSCCP.so' -passes='print<simple-sccp>' ./project2/test.ll -disable-output 2> ./project2/test.out
