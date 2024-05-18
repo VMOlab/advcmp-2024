@@ -11,6 +11,8 @@
 #include "llvm/Passes/PassPlugin.h"
 #include "llvm/Support/raw_ostream.h"
 
+#include "llvm/ADT/SmallSet.h"
+
 using namespace llvm;
 
 AnalysisKey SimpleSCCPAnalysis::Key;
@@ -74,8 +76,11 @@ ConstantValue SimpleSCCPAnalysis::InstructionVisitor::visitPHINode(const PHINode
   ConstantValue NewValue = ConstantValue::top();
   //* TODO 1 - visit(phi)
   //******************************** TODO 1 ********************************
+  auto iter = ThePass.ExecutableEdges.begin();
   for (int i = 0, n = I.getNumIncomingValues(); i < n; ++i) {
     // TODO
+    auto BB = (iter+i)->From;
+    NewValue = NewValue.meet(I.getIncomingValueForBlock(BB));
   }
   //****************************** TODO 1 END ******************************
   return NewValue;
