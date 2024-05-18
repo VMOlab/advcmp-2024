@@ -279,6 +279,17 @@ void SimpleSCCPAnalysis::visit(const Instruction &I) {
 
   if (NewLatticeValue != OldLatticeValue) {
     // TODO
+    switch (I.getOpcode()) {
+    case Instruction::PHI:
+      TheVisitor.visitPHINode(I.);
+      break;
+    case Instruction::Br:
+      break;
+    case Instruction::ICmp:
+      break;
+    case Instruction::BinaryOpsBegin:
+      break;
+    }
   }
   //****************************** TODO 3 END ******************************
 }
