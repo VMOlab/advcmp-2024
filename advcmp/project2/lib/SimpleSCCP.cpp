@@ -262,6 +262,19 @@ void SimpleSCCPAnalysis::analyze(Function &F) {
   //******************************* TODO 2 *******************************
   while (!CFGWorkset.empty() || !SSAWorkset.empty()) {
     // TODO
+    if (!CFGWorkset.empty()) {
+      const CFGEdge &x = *CFGWorkset.begin();
+    } else {
+      const llvm::Instruction *x = *SSAWorkset.begin();
+      switch (x->getOpcode()) {
+      case Instruction::PHI:
+        visit(*x);
+        break;
+      default:
+        if (TheVisitor.ThePass.ExecutableEdges.size() != 0)
+          visit(*x);
+      }
+    }
   }
   //***************************** TODO 2 END *****************************
 }
