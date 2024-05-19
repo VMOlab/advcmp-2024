@@ -15,6 +15,7 @@
 #include <llvm-17/llvm/IR/InstrTypes.h>
 #include <llvm-17/llvm/IR/Value.h>
 #include <utility>
+#include "llvm/IR/InstIterator.h"
 
 using namespace llvm;
 
@@ -264,6 +265,16 @@ void SimpleSCCPAnalysis::analyze(Function &F) {
     // TODO
     if (!CFGWorkset.empty()) {
       const CFGEdge &x = *CFGWorkset.begin();
+      auto BB = x.To;
+      TheVisitor.ThePass.ExecutableEdges.insert(x);
+      for (const Instruction &I : *BB) visit(I);
+      if (isFirstVisit(*BB)) {
+        for (const Instruction &I : *BB) visit(I);
+      } 
+      auto succ = BB->getUniqueSuccessor();
+      if ((succ != nullptr) && (! isExecutableBlock(*succ))) {
+        CFGWorkset.insert(CFGEdge{BB, succ});
+      }
     } else {
       const llvm::Instruction *x = *SSAWorkset.begin();
       switch (x->getOpcode()) {
