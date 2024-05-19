@@ -1,3 +1,5 @@
+alt + shift + f for formatting
+----------------------------------------------------------------
 clang -O0 -S -emit-llvm -Xclang -disable-O0-optnone -fno-discard-value-names test.c -o test.ll
 
 cmake -S project1 -G Ninja -B build

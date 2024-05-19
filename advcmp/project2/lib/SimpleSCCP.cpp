@@ -12,6 +12,9 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include "llvm/ADT/SmallSet.h"
+#include <llvm-17/llvm/IR/InstrTypes.h>
+#include <llvm-17/llvm/IR/Value.h>
+#include <utility>
 
 using namespace llvm;
 
@@ -281,15 +284,22 @@ void SimpleSCCPAnalysis::visit(const Instruction &I) {
     // TODO
     switch (I.getOpcode()) {
     case Instruction::PHI:
-      TheVisitor.visitPHINode(I.);
+      NewLatticeValue = TheVisitor.visitPHINode(*static_cast<const PHINode*>(&I));
       break;
     case Instruction::Br:
+      NewLatticeValue = TheVisitor.visitBranchInst(*static_cast<const BranchInst*>(&I));
       break;
     case Instruction::ICmp:
+      NewLatticeValue = TheVisitor.visitICmpInst(*static_cast<const ICmpInst*>(&I));
       break;
     case Instruction::BinaryOpsBegin:
+      NewLatticeValue = TheVisitor.visitBinaryOperator(*static_cast<const BinaryOperator*>(&I));
       break;
+    default:
+      NewLatticeValue = TheVisitor.visitInstruction(I);
     }
+    auto vI = &const_cast<Instruction &>(I);
+    TheVisitor.ThePass.DataflowFacts.insert(std::make_pair(vI,NewLatticeValue));
   }
   //****************************** TODO 3 END ******************************
 }
