@@ -75,14 +75,15 @@ bool CFGEdge::operator==(const struct CFGEdge &Other) const {
  * Access basic algorithm variables through the reference `ThePass`.
  * (e.g., CFGWorset, DataflowFacts, ...)
  */
-ConstantValue SimpleSCCPAnalysis::InstructionVisitor::visitPHINode(const PHINode &I) {
+ConstantValue
+SimpleSCCPAnalysis::InstructionVisitor::visitPHINode(const PHINode &I) {
   ConstantValue NewValue = ConstantValue::top();
   //* TODO 1 - visit(phi)
   //******************************** TODO 1 ********************************
   auto iter = ThePass.ExecutableEdges.begin();
   for (int i = 0, n = I.getNumIncomingValues(); i < n; ++i) {
     // TODO
-    auto BB = (iter+i)->From;
+    auto BB = (iter + i)->From;
     NewValue = NewValue.meet(I.getIncomingValueForBlock(BB));
   }
   //****************************** TODO 1 END ******************************
@@ -110,8 +111,7 @@ SimpleSCCPAnalysis::InstructionVisitor::visitBranchInst(const BranchInst &I) {
       if (C.value() != 0) {
         ThePass.ExecutableEdges.insert({I.getParent(), I.getSuccessor(0)});
         ThePass.CFGWorkset.insert({I.getParent(), I.getSuccessor(0)});
-      }
-      else {
+      } else {
         ThePass.ExecutableEdges.insert({I.getParent(), I.getSuccessor(1)});
         ThePass.CFGWorkset.insert({I.getParent(), I.getSuccessor(1)});
       }
@@ -129,7 +129,8 @@ SimpleSCCPAnalysis::InstructionVisitor::visitBranchInst(const BranchInst &I) {
  * Access basic algorithm variables through the reference `ThePass`.
  * (e.g., CFGWorset, DataflowFacts, ...)
  */
-ConstantValue SimpleSCCPAnalysis::InstructionVisitor::visitICmpInst(const ICmpInst &I) {
+ConstantValue
+SimpleSCCPAnalysis::InstructionVisitor::visitICmpInst(const ICmpInst &I) {
   int64_t Int1, Int2, Result;
   Value &Operand1 = *I.getOperand(0);
   Value &Operand2 = *I.getOperand(1);
@@ -183,8 +184,8 @@ ConstantValue SimpleSCCPAnalysis::InstructionVisitor::visitICmpInst(const ICmpIn
  * Access basic algorithm variables through the reference `ThePass`.
  * (e.g., CFGWorset, DataflowFacts, ...)
  */
-ConstantValue
-SimpleSCCPAnalysis::InstructionVisitor::visitBinaryOperator(const BinaryOperator &I) {
+ConstantValue SimpleSCCPAnalysis::InstructionVisitor::visitBinaryOperator(
+    const BinaryOperator &I) {
   int64_t Int1, Int2, Result;
   Value &Operand1 = *I.getOperand(0);
   Value &Operand2 = *I.getOperand(1);
@@ -237,8 +238,8 @@ SimpleSCCPAnalysis::InstructionVisitor::visitInstruction(const Instruction &I) {
   return ConstantValue::top();
 }
 
-SimpleSCCPAnalysis::DataflowFactsTy SimpleSCCPAnalysis::run(Function &F,
-                                            FunctionAnalysisManager &FAM) {
+SimpleSCCPAnalysis::DataflowFactsTy
+SimpleSCCPAnalysis::run(Function &F, FunctionAnalysisManager &FAM) {
   analyze(F);
   return DataflowFacts;
 }
@@ -284,22 +285,27 @@ void SimpleSCCPAnalysis::visit(const Instruction &I) {
     // TODO
     switch (I.getOpcode()) {
     case Instruction::PHI:
-      NewLatticeValue = TheVisitor.visitPHINode(*static_cast<const PHINode*>(&I));
+      NewLatticeValue =
+          TheVisitor.visitPHINode(*static_cast<const PHINode *>(&I));
       break;
     case Instruction::Br:
-      NewLatticeValue = TheVisitor.visitBranchInst(*static_cast<const BranchInst*>(&I));
+      NewLatticeValue =
+          TheVisitor.visitBranchInst(*static_cast<const BranchInst *>(&I));
       break;
     case Instruction::ICmp:
-      NewLatticeValue = TheVisitor.visitICmpInst(*static_cast<const ICmpInst*>(&I));
+      NewLatticeValue =
+          TheVisitor.visitICmpInst(*static_cast<const ICmpInst *>(&I));
       break;
     case Instruction::BinaryOpsBegin:
-      NewLatticeValue = TheVisitor.visitBinaryOperator(*static_cast<const BinaryOperator*>(&I));
+      NewLatticeValue = TheVisitor.visitBinaryOperator(
+          *static_cast<const BinaryOperator *>(&I));
       break;
     default:
       NewLatticeValue = TheVisitor.visitInstruction(I);
     }
     auto vI = &const_cast<Instruction &>(I);
-    TheVisitor.ThePass.DataflowFacts.insert(std::make_pair(vI,NewLatticeValue));
+    TheVisitor.ThePass.DataflowFacts.insert(
+        std::make_pair(vI, NewLatticeValue));
   }
   //****************************** TODO 3 END ******************************
 }
