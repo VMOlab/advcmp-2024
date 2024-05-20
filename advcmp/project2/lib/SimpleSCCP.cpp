@@ -12,10 +12,10 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include "llvm/ADT/SmallSet.h"
+#include "llvm/IR/InstIterator.h"
 #include <llvm-17/llvm/IR/InstrTypes.h>
 #include <llvm-17/llvm/IR/Value.h>
 #include <utility>
-#include "llvm/IR/InstIterator.h"
 
 using namespace llvm;
 
@@ -81,12 +81,16 @@ SimpleSCCPAnalysis::InstructionVisitor::visitPHINode(const PHINode &I) {
   ConstantValue NewValue = ConstantValue::top();
   //* TODO 1 - visit(phi)
   //******************************** TODO 1 ********************************
-  auto iter = ThePass.ExecutableEdges.begin();
-  for (int i = 0, n = I.getNumIncomingValues(); i < n; ++i) {
-    // TODO
-    auto BB = (iter + i)->From;
+  // for (int i = 0, n = I.getNumIncomingValues(); i < n; ++i) {
+  // TODO
+  errs() << "visit phi\n";
+  for (auto e = ThePass.ExecutableEdges.begin();
+       e != ThePass.ExecutableEdges.end(); ++e) {
+    auto edge = *e;
+    auto BB = edge.From;
     NewValue = NewValue.meet(I.getIncomingValueForBlock(BB));
   }
+  // }
   //****************************** TODO 1 END ******************************
   return NewValue;
 }
@@ -261,20 +265,25 @@ void SimpleSCCPAnalysis::analyze(Function &F) {
 
   //* TODO 2 - Algorithm 1 : SCCP
   //******************************* TODO 2 *******************************
+  errs() << "start! \n";
   while (!CFGWorkset.empty() || !SSAWorkset.empty()) {
     // TODO
+    errs() << "each iteration\n";
     if (!CFGWorkset.empty()) {
       const CFGEdge &x = *CFGWorkset.begin();
       auto BB = x.To;
       TheVisitor.ThePass.ExecutableEdges.insert(x);
-      for (const Instruction &I : *BB) visit(I);
+      for (const Instruction &I : *BB)
+        visit(I);
       if (isFirstVisit(*BB)) {
-        for (const Instruction &I : *BB) visit(I);
-      } 
+        for (const Instruction &I : *BB)
+          visit(I);
+      }
       auto succ = BB->getUniqueSuccessor();
-      if ((succ != nullptr) && (! isExecutableBlock(*succ))) {
+      if ((succ != nullptr) && (!isExecutableBlock(*succ))) {
         CFGWorkset.insert(CFGEdge{BB, succ});
       }
+      CFGWorkset.erase(x);
     } else {
       const llvm::Instruction *x = *SSAWorkset.begin();
       switch (x->getOpcode()) {
@@ -285,7 +294,13 @@ void SimpleSCCPAnalysis::analyze(Function &F) {
         if (TheVisitor.ThePass.ExecutableEdges.size() != 0)
           visit(*x);
       }
+      SSAWorkset.erase(x);
     }
+  }
+  for (auto iter = DataflowFacts.begin(); iter != DataflowFacts.end(); ++iter) {
+    auto v = (iter->getFirst())->getName();
+    auto c = (iter->getSecond()).value();
+    errs() << v << " : " << c << "\n";
   }
   //***************************** TODO 2 END *****************************
 }
@@ -305,31 +320,31 @@ void SimpleSCCPAnalysis::visit(const Instruction &I) {
   if (OldLatticeValueIt != DataflowFacts.end())
     OldLatticeValue = OldLatticeValueIt->second;
 
+  switch (I.getOpcode()) {
+  case Instruction::PHI:
+    NewLatticeValue =
+        TheVisitor.visitPHINode(*static_cast<const PHINode *>(&I));
+    break;
+  case Instruction::Br:
+    NewLatticeValue =
+        TheVisitor.visitBranchInst(*static_cast<const BranchInst *>(&I));
+    break;
+  case Instruction::ICmp:
+    NewLatticeValue =
+        TheVisitor.visitICmpInst(*static_cast<const ICmpInst *>(&I));
+    break;
+  case Instruction::BinaryOpsBegin:
+    NewLatticeValue = TheVisitor.visitBinaryOperator(
+        *static_cast<const BinaryOperator *>(&I));
+    break;
+  default:
+    NewLatticeValue = TheVisitor.visitInstruction(I);
+  }
+  auto vI = &const_cast<Instruction &>(I);
+  TheVisitor.ThePass.DataflowFacts.insert(std::make_pair(vI, NewLatticeValue));
   if (NewLatticeValue != OldLatticeValue) {
     // TODO
-    switch (I.getOpcode()) {
-    case Instruction::PHI:
-      NewLatticeValue =
-          TheVisitor.visitPHINode(*static_cast<const PHINode *>(&I));
-      break;
-    case Instruction::Br:
-      NewLatticeValue =
-          TheVisitor.visitBranchInst(*static_cast<const BranchInst *>(&I));
-      break;
-    case Instruction::ICmp:
-      NewLatticeValue =
-          TheVisitor.visitICmpInst(*static_cast<const ICmpInst *>(&I));
-      break;
-    case Instruction::BinaryOpsBegin:
-      NewLatticeValue = TheVisitor.visitBinaryOperator(
-          *static_cast<const BinaryOperator *>(&I));
-      break;
-    default:
-      NewLatticeValue = TheVisitor.visitInstruction(I);
-    }
-    auto vI = &const_cast<Instruction &>(I);
-    TheVisitor.ThePass.DataflowFacts.insert(
-        std::make_pair(vI, NewLatticeValue));
+    errs() << "visit special\n";
   }
   //****************************** TODO 3 END ******************************
 }
