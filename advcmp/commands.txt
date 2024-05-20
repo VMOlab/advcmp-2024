@@ -21,4 +21,4 @@ opt -S -passes='mem2reg' ./project2/test.ll -o ./project2/input.ll
 
 cmake --build build
 
-opt -S -load-pass-plugin='build/lib/libSimpleSCCP.so' -passes='print<simple-sccp>' ./project2/test.ll -disable-output 2> ./project2/test.out
+opt -S -load-pass-plugin='build/lib/libSimpleSCCP.so' -passes='print<simple-sccp>' ./project2/input.ll -disable-output 2> ./project2/test.out

@@ -1,32 +1,38 @@
-start! 
+start with 1, 0
 each iteration
-y : 94390787704992
- : 94390787704992
- : 94390787704992
-add : 94390787704992
-z : 94390787704992
-cmp : 94390787704992
- : 94390787704992
- : 94390787704992
- : 94390787704992
- : 94390787704992
-add1 : 94390787704992
-retval : 0
- : 94390787704992
-x : 94390787704992
- : 94390787704992
-%y : { TOP }
-%1 : { TOP }
-<badref> : { TOP }
-%add : { TOP }
-%z : { TOP }
-%cmp : { TOP }
-<badref> : { TOP }
-%2 : { TOP }
-<badref> : { TOP }
-%0 : { TOP }
-%add1 : { TOP }
-%retval : { TOP }
-<badref> : { TOP }
-%x : { TOP }
-<badref> : { TOP }
+nonempty CFGWorklist
+  %add = add nsw i32 1, 2
+visit   %add = add nsw i32 1, 2 new : { 3 }, old : { TOP }
+visit special
+  %add1 = add nsw i32 %add, 2
+visit   %add1 = add nsw i32 %add, 2 new : { 5 }, old : { TOP }
+visit special
+visit   %cmp = icmp slt i32 %add, 2 new : { 0 }, old : { TOP }
+visit special
+visit   br i1 %cmp, label %if.then, label %if.end new : { TOP }, old : { TOP }
+  %add = add nsw i32 1, 2
+visit   %add = add nsw i32 1, 2 new : { 3 }, old : { 3 }
+  %add1 = add nsw i32 %add, 2
+visit   %add1 = add nsw i32 %add, 2 new : { 5 }, old : { 5 }
+visit   %cmp = icmp slt i32 %add, 2 new : { 0 }, old : { 0 }
+visit   br i1 %cmp, label %if.then, label %if.end new : { TOP }, old : { TOP }
+0 | 1
+each iteration
+nonempty CFGWorklist
+visit phi
+visit phi
+visit   %z.0 = phi i32 [ 1, %if.then ], [ %add1, %entry ] new : { TOP }, old : { TOP }
+visit   %call = call i32 (ptr, ...) @printf(ptr noundef @.str, i32 noundef 1, i32 noundef %add, i32 noundef %z.0) new : { TOP }, old : { TOP }
+visit   ret i32 0 new : { TOP }, old : { TOP }
+visit phi
+visit phi
+visit   %z.0 = phi i32 [ 1, %if.then ], [ %add1, %entry ] new : { TOP }, old : { TOP }
+visit   %call = call i32 (ptr, ...) @printf(ptr noundef @.str, i32 noundef 1, i32 noundef %add, i32 noundef %z.0) new : { TOP }, old : { TOP }
+visit   ret i32 0 new : { TOP }, old : { TOP }
+0 | 1
+add : 3
+add1 : 5
+cmp : 0
+%add : { 3 }
+%add1 : { 5 }
+%cmp : { 0 }

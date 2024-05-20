@@ -88,7 +88,8 @@ SimpleSCCPAnalysis::InstructionVisitor::visitPHINode(const PHINode &I) {
        e != ThePass.ExecutableEdges.end(); ++e) {
     auto edge = *e;
     auto BB = edge.From;
-    NewValue = NewValue.meet(I.getIncomingValueForBlock(BB));
+    if (I.getBasicBlockIndex(BB) >= 0)
+      NewValue = NewValue.meet(I.getIncomingValueForBlock(BB));
   }
   // }
   //****************************** TODO 1 END ******************************
@@ -265,11 +266,13 @@ void SimpleSCCPAnalysis::analyze(Function &F) {
 
   //* TODO 2 - Algorithm 1 : SCCP
   //******************************* TODO 2 *******************************
-  errs() << "start! \n";
+  errs() << "start with " << CFGWorkset.size() << ", " << SSAWorkset.size()
+         << "\n";
   while (!CFGWorkset.empty() || !SSAWorkset.empty()) {
     // TODO
     errs() << "each iteration\n";
     if (!CFGWorkset.empty()) {
+      errs() << "nonempty CFGWorklist\n";
       const CFGEdge &x = *CFGWorkset.begin();
       auto BB = x.To;
       TheVisitor.ThePass.ExecutableEdges.insert(x);
@@ -280,11 +283,15 @@ void SimpleSCCPAnalysis::analyze(Function &F) {
           visit(I);
       }
       auto succ = BB->getUniqueSuccessor();
+      errs() << (succ != nullptr) << " | " << (!isExecutableBlock(*succ))
+             << "\n";
       if ((succ != nullptr) && (!isExecutableBlock(*succ))) {
+        errs() << "append in CFGWorklist\n";
         CFGWorkset.insert(CFGEdge{BB, succ});
       }
       CFGWorkset.erase(x);
     } else {
+      errs() << "nonempty SSAWorklist\n";
       const llvm::Instruction *x = *SSAWorkset.begin();
       switch (x->getOpcode()) {
       case Instruction::PHI:
@@ -334,6 +341,7 @@ void SimpleSCCPAnalysis::visit(const Instruction &I) {
         TheVisitor.visitICmpInst(*static_cast<const ICmpInst *>(&I));
     break;
   case Instruction::BinaryOpsBegin:
+    errs() << I << "\n";
     NewLatticeValue = TheVisitor.visitBinaryOperator(
         *static_cast<const BinaryOperator *>(&I));
     break;
@@ -341,7 +349,11 @@ void SimpleSCCPAnalysis::visit(const Instruction &I) {
     NewLatticeValue = TheVisitor.visitInstruction(I);
   }
   auto vI = &const_cast<Instruction &>(I);
-  TheVisitor.ThePass.DataflowFacts.insert(std::make_pair(vI, NewLatticeValue));
+  if (!NewLatticeValue.isTop())
+    TheVisitor.ThePass.DataflowFacts.insert(
+        std::make_pair(vI, NewLatticeValue));
+  errs() << "visit " << I << " new : " << NewLatticeValue
+         << ", old : " << OldLatticeValue << "\n";
   if (NewLatticeValue != OldLatticeValue) {
     // TODO
     errs() << "visit special\n";
