@@ -22,7 +22,7 @@ ConstantValue ConstantValue::meet(const ConstantValue &Other) const {
 
   if (IsTop) {
     return Other;
-  } else if (!IsBot && *this == Other) {
+  } else if (Other.IsTop || *this == Other) {
     return *this;
   } else {
     return bot();
@@ -106,6 +106,8 @@ SimpleSCCPAnalysis::InstructionVisitor::visitBranchInst(const BranchInst &I) {
         ThePass.ExecutableEdges.insert({I.getParent(), I.getSuccessor(1)});
         ThePass.CFGWorkset.insert({I.getParent(), I.getSuccessor(1)});
       }
+    } else {
+      ThePass.appendExecutableSuccessors(I);
     }
   } else {
     ThePass.appendExecutableSuccessors(I);
@@ -225,7 +227,7 @@ SimpleSCCPAnalysis::InstructionVisitor::visitBinaryOperator(const BinaryOperator
  */
 ConstantValue
 SimpleSCCPAnalysis::InstructionVisitor::visitInstruction(const Instruction &I) {
-  return ConstantValue::top();
+  return ConstantValue::bot();
 }
 
 SimpleSCCPAnalysis::DataflowFactsTy SimpleSCCPAnalysis::run(Function &F,
