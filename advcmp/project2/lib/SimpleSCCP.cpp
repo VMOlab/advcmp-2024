@@ -28,7 +28,7 @@ ConstantValue ConstantValue::meet(const ConstantValue &Other) const {
 
   if (IsTop) {
     return Other;
-  } else if (!IsBot && *this == Other) {
+  } else if (Other.IsTop || *this == Other) {
     return *this;
   } else {
     return bot();
@@ -241,7 +241,7 @@ ConstantValue SimpleSCCPAnalysis::InstructionVisitor::visitBinaryOperator(
  */
 ConstantValue
 SimpleSCCPAnalysis::InstructionVisitor::visitInstruction(const Instruction &I) {
-  return ConstantValue::top();
+  return ConstantValue::bot();
 }
 
 SimpleSCCPAnalysis::DataflowFactsTy
