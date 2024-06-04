@@ -113,7 +113,7 @@ SimpleSCCPAnalysis::InstructionVisitor::visitBranchInst(const BranchInst &I) {
   } else {
     ThePass.appendExecutableSuccessors(I);
   }
-  return ConstantValue::top();
+  return ConstantValue::bot();
 }
 
 /**
